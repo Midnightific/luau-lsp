@@ -151,7 +151,7 @@ Luau::ToStringResult toStringReturnTypeDetailed(Luau::TypePackId retTypes, Luau:
 {
     size_t retSize = Luau::size(retTypes);
     bool hasTail = !Luau::finite(retTypes);
-    bool wrap = Luau::get<Luau::TypePack>(Luau::follow(retTypes)) && (hasTail ? retSize != 0 : retSize != 1);
+    bool wrap = Luau::get<Luau::TypePack>(Luau::follow(retTypes)) && (hasTail ? retSize != 0 : retSize > 1);
 
     auto result = Luau::toStringDetailed(retTypes, options);
     if (wrap)
@@ -342,6 +342,17 @@ static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const 
     }
     else if (auto mt = Luau::get<Luau::MetatableType>(parentType))
     {
+        // Check the base table first
+        auto baseTableTy = Luau::follow(mt->table);
+        if (auto mtBaseTable = Luau::get<Luau::TableType>(baseTableTy))
+        {
+            if (mtBaseTable->props.find(name) != mtBaseTable->props.end())
+            {
+                return {PropLookup{baseTableTy, mtBaseTable->props.at(name)}};
+            }
+        }
+
+        // If not found in base table, check __index in the metatable
         if (auto mtable = Luau::get<Luau::TableType>(Luau::follow(mt->metatable)))
         {
             auto indexIt = mtable->props.find("__index");
@@ -357,15 +368,6 @@ static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const 
                     // TODO: can we handle an index function...?
                     return {};
                 }
-            }
-        }
-
-        auto baseTableTy = Luau::follow(mt->table);
-        if (auto mtBaseTable = Luau::get<Luau::TableType>(baseTableTy))
-        {
-            if (mtBaseTable->props.find(name) != mtBaseTable->props.end())
-            {
-                return {PropLookup{baseTableTy, mtBaseTable->props.at(name)}};
             }
         }
     }
