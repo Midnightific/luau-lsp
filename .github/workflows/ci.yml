@@ -103,8 +103,13 @@ jobs:
       - run: npm test
         working-directory: editors/code
         if: runner.os != 'Linux'
-      - run: npx @vscode/vsce package
+      - run: npx @vscode/vsce package -o "../../dist/${{ matrix.os }}.vsix"
         working-directory: editors/code
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: ./dist
 
   selene:
     name: Run selene
