@@ -16,6 +16,7 @@ jobs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Create Release
+        if: false
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -43,6 +44,7 @@ jobs:
           path: Luau.rbxm
 
       - name: Upload Plugin to Release
+        if: false
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -174,6 +176,7 @@ jobs:
           path: ./dist
 
       - name: Upload Server to Release
+        if: false
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
