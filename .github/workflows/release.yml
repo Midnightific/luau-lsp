@@ -61,7 +61,7 @@ jobs:
           - os: windows-latest
             artifact-name: luau-lsp-win64
             code-target: [win32-x64, win32-arm64]
-            crash-reporting: true
+            crash-reporting: false
           - os: ubuntu-22.04
             artifact-name: luau-lsp-linux-x86_64
             code-target: [linux-x64]
@@ -73,7 +73,7 @@ jobs:
           - os: macos-latest
             artifact-name: luau-lsp-macos
             code-target: [darwin-x64, darwin-arm64]
-            crash-reporting: true
+            crash-reporting: false
 
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -129,19 +129,19 @@ jobs:
               chmod 777 editors/code/bin/crashpad_handler
           fi
 
-      #   - name: Setup Sentry CLI
-      #     uses: matbour/setup-sentry-cli@v2
-      #     if: matrix.crash-reporting == true
-      #     with:
-      #       token: ${{ secrets.SENTRY_AUTH_TOKEN }} //! we can use our own sentry here
-      #       organization: luau-lsp
-      #       project: luau-lsp
+      - name: Setup Sentry CLI
+        uses: matbour/setup-sentry-cli@v2
+        if: matrix.crash-reporting == true
+        with:
+          token: ${{ secrets.SENTRY_AUTH_TOKEN }} //! we can use our own sentry here
+          organization: luau-lsp
+          project: luau-lsp
 
-      #   - name: Upload debug symbols
-      #     shell: bash
-      #     if: matrix.crash-reporting == true
-      #     run: |
-      #       sentry-cli debug-files upload --include-sources build
+      - name: Upload debug symbols
+        shell: bash
+        if: matrix.crash-reporting == true
+        run: |
+          sentry-cli debug-files upload --include-sources build
 
       - name: Create Release Archive
         shell: bash
